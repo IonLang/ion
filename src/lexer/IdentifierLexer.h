@@ -1,13 +1,14 @@
 #pragma once
 
-#include "ILexer.h"
+#include "Lexer.h"
 namespace Lexing {
 
-class IdentifierLexer : public ILexer {
+class IdentifierLexer : public Lexer {
 public:
+    IdentifierLexer(uint32_t& line, uint32_t& linePos);
     ~IdentifierLexer() override {};
 
-    std::list<Token> tokenize(std::istream &input) override;
+    void tokenize(std::istream &input) override;
 };
 
 }

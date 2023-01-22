@@ -1,12 +1,12 @@
 #pragma once
 
-#include "ILexer.h"
+#include "Lexer.h"
 
 namespace Lexing {
 
-class StringLexer : public ILexer {
+class StringLexer : public Lexer {
 public:
-    StringLexer(uint32_t line, uint32_t linePos);
+    StringLexer(uint32_t& line, uint32_t& linePos);
     ~StringLexer() override {};
 
     void tokenize(std::istream& input) override;

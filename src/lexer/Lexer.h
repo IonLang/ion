@@ -6,10 +6,10 @@
 
 namespace Lexing {
 
-class ILexer {
+class Lexer {
 public:
-    ILexer(uint32_t line, uint32_t linePos);
-    virtual ~ILexer() {};
+    Lexer(uint32_t& line, uint32_t& linePos);
+    virtual ~Lexer() {};
 
     virtual void tokenize(std::istream& input) = 0;
 
@@ -18,8 +18,8 @@ public:
     uint32_t currentLinePos() const;
 protected:
     std::list<Token> list;
-    uint32_t line = 0;
-    uint32_t linePos = 0;
+    uint32_t& line;
+    uint32_t& linePos;
 };
 
 }  // namespace Lexing
