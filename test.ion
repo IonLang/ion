@@ -1,0 +1,29 @@
+package ion.test
+
+import ion.something
+
+class TestClass(var name: String, val num: I32) {
+
+    var a by lazy { 1 + 3 * 2 }
+
+    constructor() : this()
+
+    constructor() : this() {}
+
+    destructor {}
+
+    fun abstractFunction()
+
+    fun test() {
+        val ((a, b), c) = ((1, 2), 3)
+    }
+
+    fun test1(): String {
+        return "line1
+                ${Ansi.foreground(RGB(2, 5, 5))}
+                $a
+                \${line4}
+                line5"
+    }
+
+}
