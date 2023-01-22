@@ -37,6 +37,8 @@ enum TokenType {
     t_throw,
     t_try,
     t_catch,
+    t_true,
+    t_false,
     t_not,
     t_and,
     pipe,
@@ -87,6 +89,7 @@ enum TokenType {
     final,
     override,
     dot,
+    null,
 
     // string stuff
 

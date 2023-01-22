@@ -1,6 +1,7 @@
 #include "CodeLexer.h"
 #include "CharLexer.h"
 #include "IdentifierLexer.h"
+#include "NumberLexer.h"
 #include "StringLexer.h"
 
 using namespace Lexing;
@@ -9,7 +10,8 @@ CodeLexer::CodeLexer(uint32_t& line, uint32_t& linePos) : Lexer(line, linePos) {
 
 void CodeLexer::tokenize(std::istream& input) {
     char c;
-    while (!(input.get(c), input.good())) {
+    while (input.good()) {
+        input.get(c);
         linePos++;
         switch (c) {
             case '{': {
@@ -95,6 +97,16 @@ void CodeLexer::tokenize(std::istream& input) {
                 processToken();
                 break;
             default:
+                if (buffer.empty() && isdigit(c)) {
+                    input.putback(c);
+                    linePos--;
+                    auto numberLexer = NumberLexer(line, linePos);
+                    numberLexer.tokenize(input);
+                    for (const auto& i : numberLexer.tokens()) {
+                        list.push_back(i);
+                    }
+                    break;
+                }
                 buffer += c;
                 break;
         }
@@ -170,6 +182,10 @@ void CodeLexer::processToken() {
         else if (buffer == "destructor") list.push_back(Token(line, linePos - buffer.length(), TokenType::destructor));
         else if (buffer == "final") list.push_back(Token(line, linePos - buffer.length(), TokenType::final));
         else if (buffer == "override") list.push_back(Token(line, linePos - buffer.length(), TokenType::override));
+        else if (buffer == "true") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_true));
+        else if (buffer == "false") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_false));
+        else if (buffer == "null") list.push_back(Token(line, linePos - buffer.length(), TokenType::null));
+        else list.push_back(Token(line, linePos - buffer.length(), TokenType::identifier, buffer));
     }
     buffer = "";
 }
