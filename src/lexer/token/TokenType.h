@@ -4,6 +4,7 @@ namespace Lexing {
 
 enum TokenType {
     eof = 0,
+    eol,
     identifier,
     literal,
     braceLeft,
@@ -19,10 +20,12 @@ enum TokenType {
     comma,
     grave,
     fun,
+    t_this,
     t_if,
     t_else,
     t_switch,
     t_case,
+    t_default,
     t_break,
     t_continue,
     t_for,
@@ -64,6 +67,7 @@ enum TokenType {
     greaterEquals,
     assign,
     equals,
+    equalsPointer,
     notEquals,
     arrow,
     questionMark,
@@ -90,6 +94,12 @@ enum TokenType {
     override,
     dot,
     null,
+    range,
+    rangeInclusive,
+    underscore,
+    in,
+    as,
+    is,
 
     // string stuff
 

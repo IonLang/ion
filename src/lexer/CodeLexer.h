@@ -5,7 +5,7 @@ namespace Lexing {
 
 class CodeLexer : public Lexer {
 public:
-    CodeLexer(uint32_t& line, uint32_t& linePos);
+    CodeLexer(uint32_t& line, uint32_t& linePos, std::list<Token>& tokens);
     ~CodeLexer() override {};
 
     void tokenize(std::istream& input) override;

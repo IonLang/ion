@@ -6,7 +6,7 @@
 
 using namespace Lexing;
 
-CodeLexer::CodeLexer(uint32_t& line, uint32_t& linePos) : Lexer(line, linePos) {}
+CodeLexer::CodeLexer(uint32_t& line, uint32_t& linePos, std::list<Token>& tokens) : Lexer(line, linePos, tokens) {}
 
 void CodeLexer::tokenize(std::istream& input) {
     char c;
@@ -16,95 +16,107 @@ void CodeLexer::tokenize(std::istream& input) {
         switch (c) {
             case '{': {
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::braceLeft));
-                auto codeLexer = CodeLexer(line, linePos);
+                tokens.push_back(Token(line, linePos - 1, TokenType::braceLeft));
+                auto codeLexer = CodeLexer(line, linePos, tokens);
                 codeLexer.tokenize(input);
-                for (const auto& i : codeLexer.tokens()) {
-                    list.push_back(i);
-                }
                 break;
             }
             case '}':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::braceRight));
+                tokens.push_back(Token(line, linePos - 1, TokenType::braceRight));
                 return;
             case '[':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::bracketLeft));
+                tokens.push_back(Token(line, linePos - 1, TokenType::bracketLeft));
                 break;
             case ']':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::bracketRight));
+                tokens.push_back(Token(line, linePos - 1, TokenType::bracketRight));
                 break;
             case '(':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::parenLeft));
+                tokens.push_back(Token(line, linePos - 1, TokenType::parenLeft));
                 break;
             case ')':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::parenRight));
+                tokens.push_back(Token(line, linePos - 1, TokenType::parenRight));
                 break;
             case '"': {
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::doubleQuote));
-                auto stringLexer = StringLexer(line, linePos);
+                tokens.push_back(Token(line, linePos - 1, TokenType::doubleQuote));
+                auto stringLexer = StringLexer(line, linePos, tokens);
                 stringLexer.tokenize(input);
                 break;
             }
             case '\'': {
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::singleQuote));
-                auto charLexer = CharLexer(line, linePos);
+                tokens.push_back(Token(line, linePos - 1, TokenType::singleQuote));
+                auto charLexer = CharLexer(line, linePos, tokens);
                 charLexer.tokenize(input);
                 break;
             }
             case ',':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::comma));
-                break;
-            case '.':
-                processToken();
-                list.push_back(Token(line, linePos, TokenType::dot));
+                tokens.push_back(Token(line, linePos - 1, TokenType::comma));
                 break;
             case '`': {
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::grave));
-                auto identifierLexer = IdentifierLexer(line, linePos);
+                tokens.push_back(Token(line, linePos - 1, TokenType::grave));
+                auto identifierLexer = IdentifierLexer(line, linePos, tokens);
                 identifierLexer.tokenize(input);
-                for (const auto& i : identifierLexer.tokens()) {
-                    list.push_back(i);
-                }
-                break;
+                    break;
             }
             case '?':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::questionMark));
+                tokens.push_back(Token(line, linePos - 1, TokenType::questionMark));
                 break;
             case ':':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::column));
+                tokens.push_back(Token(line, linePos - 1, TokenType::column));
                 break;
             case '@':
                 processToken();
-                list.push_back(Token(line, linePos, TokenType::at));
+                tokens.push_back(Token(line, linePos - 1, TokenType::at));
                 break;
             case ' ':
                 processToken();
                 break;
+            case '.':
+                processToken();
+                char s;
+                input.get(s);
+                linePos++;
+                if (s == '.') {
+                    char t;
+                    input.get(t);
+                    linePos++;
+                    if (t == '.') {
+                        tokens.push_back(Token(line, linePos - 3, TokenType::rangeInclusive));
+                    } else {
+                        input.putback(t);
+                        linePos--;
+                        tokens.push_back(Token(line, linePos - 2, TokenType::range));
+                    }
+                } else {
+                    input.putback(s);
+                    linePos--;
+                    tokens.push_back(Token(line, linePos - 1, TokenType::dot));
+                }
+                break;
             case '\n':
+                processToken();
+                if (!tokens.empty() && tokens.back().type() != TokenType::eol) {
+                    tokens.push_back(Token(line, linePos - 1, TokenType::eol));
+                }
                 linePos = 0;
                 line++;
-                processToken();
                 break;
             default:
                 if (buffer.empty() && isdigit(c)) {
                     input.putback(c);
                     linePos--;
-                    auto numberLexer = NumberLexer(line, linePos);
+                    auto numberLexer = NumberLexer(line, linePos, tokens);
                     numberLexer.tokenize(input);
-                    for (const auto& i : numberLexer.tokens()) {
-                        list.push_back(i);
-                    }
                     break;
                 }
                 buffer += c;
@@ -114,78 +126,87 @@ void CodeLexer::tokenize(std::istream& input) {
 }
 
 void CodeLexer::processToken() {
-    if (!buffer.empty()) {
-        if (buffer == "<") list.push_back(Token(line, linePos - buffer.length(), TokenType::diamondLeft));
-        else if (buffer == ">") list.push_back(Token(line, linePos - buffer.length(), TokenType::diamondRight));
-        else if (buffer == "fun") list.push_back(Token(line, linePos - buffer.length(), TokenType::fun));
-        else if (buffer == "if") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_if));
-        else if (buffer == "else") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_else));
-        else if (buffer == "switch") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_switch));
-        else if (buffer == "case") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_case));
-        else if (buffer == "break") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_break));
-        else if (buffer == "continue") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_continue));
-        else if (buffer == "for") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_for));
-        else if (buffer == "while") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_while));
-        else if (buffer == "do") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_do));
-        else if (buffer == "return") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_return));
-        else if (buffer == "class") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_class));
-        else if (buffer == "enum") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_enum));
-        else if (buffer == "private") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_private));
-        else if (buffer == "public") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_public));
-        else if (buffer == "protected") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_protected));
-        else if (buffer == "throw") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_throw));
-        else if (buffer == "try") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_try));
-        else if (buffer == "catch") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_catch));
-        else if (buffer == "!") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_not));
-        else if (buffer == "&") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_and));
-        else if (buffer == "|") list.push_back(Token(line, linePos - buffer.length(), TokenType::pipe));
-        else if (buffer == "<<") list.push_back(Token(line, linePos - buffer.length(), TokenType::shLeft));
-        else if (buffer == ">>") list.push_back(Token(line, linePos - buffer.length(), TokenType::shRight));
-        else if (buffer == "+") list.push_back(Token(line, linePos - buffer.length(), TokenType::plus));
-        else if (buffer == "-") list.push_back(Token(line, linePos - buffer.length(), TokenType::minus));
-        else if (buffer == "*") list.push_back(Token(line, linePos - buffer.length(), TokenType::times));
-        else if (buffer == "/") list.push_back(Token(line, linePos - buffer.length(), TokenType::divided));
-        else if (buffer == "**") list.push_back(Token(line, linePos - buffer.length(), TokenType::power));
-        else if (buffer == "%") list.push_back(Token(line, linePos - buffer.length(), TokenType::modulo));
-        else if (buffer == "&=") list.push_back(Token(line, linePos - buffer.length(), TokenType::andAssign));
-        else if (buffer == "|=") list.push_back(Token(line, linePos - buffer.length(), TokenType::pipeAssign));
-        else if (buffer == "<<=") list.push_back(Token(line, linePos - buffer.length(), TokenType::shLeftAssign));
-        else if (buffer == ">>=") list.push_back(Token(line, linePos - buffer.length(), TokenType::shRightAssign));
-        else if (buffer == "+=") list.push_back(Token(line, linePos - buffer.length(), TokenType::plusAssign));
-        else if (buffer == "-=") list.push_back(Token(line, linePos - buffer.length(), TokenType::minusAssign));
-        else if (buffer == "*=") list.push_back(Token(line, linePos - buffer.length(), TokenType::timesAssign));
-        else if (buffer == "/=") list.push_back(Token(line, linePos - buffer.length(), TokenType::dividedAssign));
-        else if (buffer == "**=") list.push_back(Token(line, linePos - buffer.length(), TokenType::powerAssign));
-        else if (buffer == "%=") list.push_back(Token(line, linePos - buffer.length(), TokenType::moduloAssign));
-        else if (buffer == "<=") list.push_back(Token(line, linePos - buffer.length(), TokenType::lessEquals));
-        else if (buffer == ">=") list.push_back(Token(line, linePos - buffer.length(), TokenType::greaterEquals));
-        else if (buffer == "=") list.push_back(Token(line, linePos - buffer.length(), TokenType::assign));
-        else if (buffer == "==") list.push_back(Token(line, linePos - buffer.length(), TokenType::equals));
-        else if (buffer == "!=") list.push_back(Token(line, linePos - buffer.length(), TokenType::notEquals));
-        else if (buffer == "->") list.push_back(Token(line, linePos - buffer.length(), TokenType::arrow));
-        else if (buffer == "import") list.push_back(Token(line, linePos - buffer.length(), TokenType::import));
-        else if (buffer == "package") list.push_back(Token(line, linePos - buffer.length(), TokenType::package));
-        else if (buffer == "var") list.push_back(Token(line, linePos - buffer.length(), TokenType::var));
-        else if (buffer == "val") list.push_back(Token(line, linePos - buffer.length(), TokenType::val));
-        else if (buffer == "by") list.push_back(Token(line, linePos - buffer.length(), TokenType::by));
-        else if (buffer == "data") list.push_back(Token(line, linePos - buffer.length(), TokenType::data));
-        else if (buffer == "immutable") list.push_back(Token(line, linePos - buffer.length(), TokenType::immutable));
-        else if (buffer == "singleton") list.push_back(Token(line, linePos - buffer.length(), TokenType::singleton));
-        else if (buffer == "interface") list.push_back(Token(line, linePos - buffer.length(), TokenType::interface));
-        else if (buffer == "sealed") list.push_back(Token(line, linePos - buffer.length(), TokenType::sealed));
-        else if (buffer == "open") list.push_back(Token(line, linePos - buffer.length(), TokenType::open));
-        else if (buffer == "abstract") list.push_back(Token(line, linePos - buffer.length(), TokenType::abstract));
-        else if (buffer == "internal") list.push_back(Token(line, linePos - buffer.length(), TokenType::internal));
-        else if (buffer == "annotation") list.push_back(Token(line, linePos - buffer.length(), TokenType::annotation));
-        else if (buffer == "external") list.push_back(Token(line, linePos - buffer.length(), TokenType::external));
-        else if (buffer == "constructor") list.push_back(Token(line, linePos - buffer.length(), TokenType::constructor));
-        else if (buffer == "destructor") list.push_back(Token(line, linePos - buffer.length(), TokenType::destructor));
-        else if (buffer == "final") list.push_back(Token(line, linePos - buffer.length(), TokenType::final));
-        else if (buffer == "override") list.push_back(Token(line, linePos - buffer.length(), TokenType::override));
-        else if (buffer == "true") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_true));
-        else if (buffer == "false") list.push_back(Token(line, linePos - buffer.length(), TokenType::t_false));
-        else if (buffer == "null") list.push_back(Token(line, linePos - buffer.length(), TokenType::null));
-        else list.push_back(Token(line, linePos - buffer.length(), TokenType::identifier, buffer));
+    if (buffer.empty()) {
+        buffer = "";
+        return;
     }
+    if (buffer == "<") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::diamondLeft));
+    else if (buffer == ">") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::diamondRight));
+    else if (buffer == "fun") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::fun));
+    else if (buffer == "if") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_if));
+    else if (buffer == "else") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_else));
+    else if (buffer == "switch") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_switch));
+    else if (buffer == "case") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_case));
+    else if (buffer == "default") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_default));
+    else if (buffer == "break") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_break));
+    else if (buffer == "continue") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_continue));
+    else if (buffer == "for") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_for));
+    else if (buffer == "while") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_while));
+    else if (buffer == "do") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_do));
+    else if (buffer == "return") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_return));
+    else if (buffer == "class") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_class));
+    else if (buffer == "enum") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_enum));
+    else if (buffer == "private") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_private));
+    else if (buffer == "public") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_public));
+    else if (buffer == "protected") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_protected));
+    else if (buffer == "throw") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_throw));
+    else if (buffer == "try") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_try));
+    else if (buffer == "catch") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_catch));
+    else if (buffer == "!") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_not));
+    else if (buffer == "&") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_and));
+    else if (buffer == "|") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::pipe));
+    else if (buffer == "<<") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::shLeft));
+    else if (buffer == ">>") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::shRight));
+    else if (buffer == "+") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::plus));
+    else if (buffer == "-") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::minus));
+    else if (buffer == "*") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::times));
+    else if (buffer == "/") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::divided));
+    else if (buffer == "**") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::power));
+    else if (buffer == "%") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::modulo));
+    else if (buffer == "&=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::andAssign));
+    else if (buffer == "|=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::pipeAssign));
+    else if (buffer == "<<=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::shLeftAssign));
+    else if (buffer == ">>=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::shRightAssign));
+    else if (buffer == "+=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::plusAssign));
+    else if (buffer == "-=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::minusAssign));
+    else if (buffer == "*=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::timesAssign));
+    else if (buffer == "/=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::dividedAssign));
+    else if (buffer == "**=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::powerAssign));
+    else if (buffer == "%=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::moduloAssign));
+    else if (buffer == "<=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::lessEquals));
+    else if (buffer == ">=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::greaterEquals));
+    else if (buffer == "=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::assign));
+    else if (buffer == "==") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::equals));
+    else if (buffer == "===") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::equalsPointer));
+    else if (buffer == "!=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::notEquals));
+    else if (buffer == "->") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::arrow));
+    else if (buffer == "import") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::import));
+    else if (buffer == "package") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::package));
+    else if (buffer == "var") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::var));
+    else if (buffer == "val") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::val));
+    else if (buffer == "by") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::by));
+    else if (buffer == "data") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::data));
+    else if (buffer == "immutable") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::immutable));
+    else if (buffer == "singleton") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::singleton));
+    else if (buffer == "interface") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::interface));
+    else if (buffer == "sealed") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::sealed));
+    else if (buffer == "open") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::open));
+    else if (buffer == "abstract") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::abstract));
+    else if (buffer == "internal") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::internal));
+    else if (buffer == "annotation") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::annotation));
+    else if (buffer == "external") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::external));
+    else if (buffer == "constructor") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::constructor));
+    else if (buffer == "destructor") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::destructor));
+    else if (buffer == "final") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::final));
+    else if (buffer == "override") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::override));
+    else if (buffer == "true") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_true));
+    else if (buffer == "false") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_false));
+    else if (buffer == "null") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::null));
+    else if (buffer == "in") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::in));
+    else if (buffer == "as") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::as));
+    else if (buffer == "is") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::is));
+    else if (buffer == "_") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::underscore));
+    else if (buffer == "this") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_this));
+    else tokens.push_back(Token(line, linePos - buffer.length(), TokenType::identifier, buffer));
     buffer = "";
 }

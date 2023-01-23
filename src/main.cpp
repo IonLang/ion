@@ -8,13 +8,14 @@ int main() {
     std::ifstream testFile("test.ion", std::ios::in);
     uint32_t line = 0;
     uint32_t linePos = 0;
-    CodeLexer lexer = CodeLexer(line, linePos);
+    std::list<Token> tokens;
+    CodeLexer lexer = CodeLexer(line, linePos, tokens);
     lexer.tokenize(testFile);
-    std::list<Token> tokens = lexer.tokens();
     tokens.push_back(Token(lexer.currentLine(), lexer.currentLinePos(), TokenType::eof));
     testFile.close();
     std::string a[] = {
         "eof",
+        "eol",
         "identifier",
         "literal",
         "braceLeft",
@@ -30,10 +31,12 @@ int main() {
         "comma",
         "grave",
         "fun",
+        "t_this",
         "t_if",
         "t_else",
         "t_switch",
         "t_case",
+        "t_default",
         "t_break",
         "t_continue",
         "t_for",
@@ -75,6 +78,7 @@ int main() {
         "greaterEquals",
         "assign",
         "equals",
+        "equalsPointer",
         "notEquals",
         "arrow",
         "questionMark",
@@ -100,7 +104,13 @@ int main() {
         "final",
         "override",
         "dot",
-        "null"
+        "null",
+        "range",
+        "rangeInclusive",
+        "underscore",
+        "in",
+        "as",
+        "is"
     };
     std::ofstream output("tokens.txt", std::ios::out);
     for (auto& i : tokens) {
