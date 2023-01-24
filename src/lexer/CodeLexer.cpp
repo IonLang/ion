@@ -154,6 +154,7 @@ void CodeLexer::processToken() {
     else if (buffer == "catch") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_catch));
     else if (buffer == "!") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_not));
     else if (buffer == "&") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_and));
+    else if (buffer == "^") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_xor));
     else if (buffer == "|") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::pipe));
     else if (buffer == "<<") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::shLeft));
     else if (buffer == ">>") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::shRight));
@@ -164,6 +165,7 @@ void CodeLexer::processToken() {
     else if (buffer == "**") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::power));
     else if (buffer == "%") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::modulo));
     else if (buffer == "&=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::andAssign));
+    else if (buffer == "^=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::xorAssign));
     else if (buffer == "|=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::pipeAssign));
     else if (buffer == "<<=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::shLeftAssign));
     else if (buffer == ">>=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::shRightAssign));
@@ -207,6 +209,10 @@ void CodeLexer::processToken() {
     else if (buffer == "is") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::is));
     else if (buffer == "_") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::underscore));
     else if (buffer == "this") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_this));
+    else if (buffer == "operator") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_operator));
+    else if (buffer == "inline") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_inline));
+    else if (buffer == "infix") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::infix));
+    else if (buffer == "mutable") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_mutable));
     else tokens.push_back(Token(line, linePos - buffer.length(), TokenType::identifier, buffer));
     buffer = "";
 }

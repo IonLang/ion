@@ -51,10 +51,14 @@ int main() {
         "t_throw",
         "t_try",
         "t_catch",
+        "t_operator",
+        "t_inline",
+        "t_mutable",
         "t_true",
         "t_false",
         "t_not",
         "t_and",
+        "t_xor",
         "pipe",
         "shLeft",
         "shRight",
@@ -65,6 +69,7 @@ int main() {
         "power",
         "modulo",
         "andAssign",
+        "xorAssign",
         "pipeAssign",
         "shLeftAssign",
         "shRightAssign",
@@ -110,11 +115,16 @@ int main() {
         "underscore",
         "in",
         "as",
-        "is"
+        "is",
+        "infix"
     };
     std::ofstream output("tokens.txt", std::ios::out);
     for (auto& i : tokens) {
         output.write(a[i.type()].data(), a[i.type()].length());
+        if (i.type() == TokenType::literal || i.type() == TokenType::identifier) {
+            std::string s = "\t\t" + i.value();
+            output.write(s.c_str(), s.length());
+        }
         output.write("\n", 1);
     }
     output.close();

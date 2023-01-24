@@ -40,10 +40,14 @@ enum TokenType {
     t_throw,
     t_try,
     t_catch,
+    t_operator,
+    t_inline,
+    t_mutable,
     t_true,
     t_false,
     t_not,
     t_and,
+    t_xor,
     pipe,
     shLeft,
     shRight,
@@ -54,6 +58,7 @@ enum TokenType {
     power,
     modulo,
     andAssign,
+    xorAssign,
     pipeAssign,
     shLeftAssign,
     shRightAssign,
@@ -100,6 +105,7 @@ enum TokenType {
     in,
     as,
     is,
+    infix,
 
     // string stuff
 
