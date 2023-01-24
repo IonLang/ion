@@ -66,27 +66,29 @@ void NumberLexer::tokenize(std::istream& input) {
             case 'd':
                 if (isdigit(c)) {
                     buffer += c;
-                    break;
+                    continue;
                 }
                 input.putback(c);
                 linePos--;
+                break;
             case 'x':
                 if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                     buffer += c;
-                    break;
+                    continue;
                 }
                 input.putback(c);
                 linePos--;
+                break;
             case 'b':
                 if (c == '0' || c == '1') {
                     buffer += c;
-                    break;
+                    continue;
                 }
                 input.putback(c);
                 linePos--;
-            default:
-                tokens.push_back(Token(line, linePos - buffer.length(), TokenType::literal, buffer));
-                return;
+                break;
         }
+        tokens.push_back(Token(line, linePos - buffer.length(), TokenType::literal, buffer));
+        return;
     }
 }
