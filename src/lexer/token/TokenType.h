@@ -45,6 +45,7 @@ enum TokenType {
     t_mutable,
     t_true,
     t_false,
+    t_typedef,
     t_not,
     t_and,
     t_xor,

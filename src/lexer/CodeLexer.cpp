@@ -212,6 +212,7 @@ void CodeLexer::processToken() {
     else if (buffer == "inline") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_inline));
     else if (buffer == "infix") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::infix));
     else if (buffer == "mutable") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_mutable));
+    else if (buffer == "typedef") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_typedef));
     else tokens.push_back(Token(line, linePos - buffer.length(), TokenType::identifier, buffer));
     buffer = "";
 }
