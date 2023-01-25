@@ -183,7 +183,6 @@ void CodeLexer::processToken() {
     else if (buffer == "!=") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::notEquals));
     else if (buffer == "->") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::arrow));
     else if (buffer == "import") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::import));
-    else if (buffer == "package") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::package));
     else if (buffer == "var") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::var));
     else if (buffer == "val") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::val));
     else if (buffer == "by") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::by));

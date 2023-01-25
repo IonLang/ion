@@ -78,7 +78,6 @@ enum TokenType {
     questionMark,
     column,
     import,
-    package,
     var,
     val,
     by,

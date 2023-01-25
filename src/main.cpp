@@ -89,7 +89,6 @@ int main() {
         "questionMark",
         "column",
         "import",
-        "package",
         "var",
         "val",
         "by",

@@ -1,5 +1,3 @@
-package ion.test
-
 import ion.something
 
 class TestClass(var name: String, val num: I32) {
