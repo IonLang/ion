@@ -11,6 +11,7 @@ public:
 
     void tokenize(std::istream& input) override;
 private:
+    void processToken();
     std::string buffer = "";
 };
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include "lexer/CodeLexer.h"
@@ -11,7 +12,7 @@ int main() {
     std::list<Token> tokens;
     CodeLexer lexer = CodeLexer(line, linePos, tokens);
     lexer.tokenize(testFile);
-    tokens.push_back(Token(lexer.currentLine(), lexer.currentLinePos(), TokenType::eof));
+    tokens.push_back(Token(line, linePos, TokenType::eof));
     testFile.close();
     std::string a[] = {
         "eof",
@@ -116,13 +117,31 @@ int main() {
         "in",
         "as",
         "is",
-        "infix"
+        "infix",
+        "increment",
+        "decrement",
+        "escSingleQuote",
+        "escDoubleQuote",
+        "escBackSlash",
+        "escNewLine",
+        "escCarriageReturn",
+        "escTab",
+        "escBackspace",
+        "escFormFeed",
+        "escBell",
+        "escOctal",
+        "escHex",
+        "escUnicode",
+        "escDollarSign",
+        "dollarSign",
     };
     std::ofstream output("tokens.txt", std::ios::out);
     for (auto& i : tokens) {
         output.write(a[i.type()].data(), a[i.type()].length());
         if (i.type() == TokenType::literal || i.type() == TokenType::identifier) {
-            std::string s = "\t\t" + i.value();
+            std::string value = i.value();
+            std::replace(value.begin(), value.end(), '\n', '\\');
+            std::string s = "\t\t" + value;
             output.write(s.c_str(), s.length());
         }
         output.write("\n", 1);

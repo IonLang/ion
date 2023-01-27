@@ -106,11 +106,13 @@ enum TokenType {
     as,
     is,
     infix,
+    increment,
+    decrement,
 
     // string stuff
 
     escSingleQuote,
-    escDoubleQuite,
+    escDoubleQuote,
     escBackSlash,
     escNewLine,
     escCarriageReturn,

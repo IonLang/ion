@@ -12,9 +12,6 @@ public:
     virtual ~Lexer() {};
 
     virtual void tokenize(std::istream& input) = 0;
-
-    uint32_t currentLine() const;
-    uint32_t currentLinePos() const;
 protected:
     uint32_t& line;
     uint32_t& linePos;

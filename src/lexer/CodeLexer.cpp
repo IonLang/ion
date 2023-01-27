@@ -64,7 +64,7 @@ void CodeLexer::tokenize(std::istream& input) {
                 tokens.push_back(Token(line, linePos - 1, TokenType::grave));
                 auto identifierLexer = IdentifierLexer(line, linePos, tokens);
                 identifierLexer.tokenize(input);
-                    break;
+                break;
             }
             case '?':
                 processToken();
@@ -213,6 +213,8 @@ void CodeLexer::processToken() {
     else if (buffer == "infix") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::infix));
     else if (buffer == "mutable") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_mutable));
     else if (buffer == "typedef") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::t_typedef));
+    else if (buffer == "++") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::increment));
+    else if (buffer == "--") tokens.push_back(Token(line, linePos - buffer.length(), TokenType::decrement));
     else tokens.push_back(Token(line, linePos - buffer.length(), TokenType::identifier, buffer));
     buffer = "";
 }

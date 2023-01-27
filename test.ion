@@ -4,6 +4,8 @@ class TestClass(var name: String, val num: I32) {
 
     var a by lazy { 1 + 3 * 2 }
 
+    var `more open identifier` = null
+
     constructor {}
 
     constructor() : this() {}
