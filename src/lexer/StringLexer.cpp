@@ -3,54 +3,46 @@
 #include "CodeLexer.h"
 
 using namespace Lexing;
+using namespace FileAccess;
 
-StringLexer::StringLexer(uint32_t& line, uint32_t& linePos, std::list<Token>& tokens) : Lexer(line, linePos, tokens) {}
+StringLexer::StringLexer(std::list<Token>& tokens) : Lexer(tokens) {}
 
-void StringLexer::tokenize(std::istream& input) {
-    uint32_t startLinePos = linePos;
+void StringLexer::tokenize(FileReader& input) {
+    uint32_t startLinePos = input.getLinePos();
     char c;
     while (input.good()) {
-        input.get(c);
-        linePos++;
+        c = input.getch();
         switch (c) {
             case '"':
-                processToken();
-                tokens.push_back(Token(line, linePos - 1, TokenType::doubleQuote));
+                processToken(input);
+                tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::doubleQuote));
                 return;
             case '$': {
-                char n;
-                input.get(n);
-                linePos++;
+                char n = input.getch();
                 if (n == '{') {
-                    processToken();
-                    tokens.push_back(Token(line, linePos - 2, TokenType::dollarSign));
-                    tokens.push_back(Token(line, linePos - 1, TokenType::braceLeft));
-                    auto codeLexer = CodeLexer(line, linePos, tokens);
+                    processToken(input);
+                    tokens.push_back(Token(input.getLine(), input.getLinePos() - 2, TokenType::dollarSign));
+                    tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::braceLeft));
+                    auto codeLexer = CodeLexer(tokens);
                     codeLexer.tokenize(input);
                 } else {
                     buffer += c;
-                    input.putback(n);
-                    linePos--;
+                    input.putch(n);
                 }
                 break;
             }
             case '\\': {
-                processToken();
-                input.putback(c);
-                linePos--;
-                auto charLexer = CharLexer(line, linePos, tokens);
+                processToken(input);
+                input.putch(c);
+                auto charLexer = CharLexer(tokens);
                 charLexer.tokenize(input);
                 break;
             }
             case '\n':
-                linePos = 0;
-                line++;
-                while (linePos < startLinePos) {
-                    char e;
-                    input.get(e);
-                    linePos++;
+                while (input.getLinePos() < startLinePos) {
+                    char e = input.getch();
                     if (e == '\n') {
-                        input.putback('\n');
+                        input.putch('\n');
                         break;
                     } else if (e != ' ') {
                         throw std::exception();
@@ -65,11 +57,11 @@ void StringLexer::tokenize(std::istream& input) {
     }
 }
 
-void StringLexer::processToken() {
+void StringLexer::processToken(FileAccess::FileReader& input) {
     if (buffer.empty()) {
         buffer = "";
         return;
     }
-    tokens.push_back(Token(line, linePos - buffer.length(), TokenType::literal, buffer));
+    tokens.push_back(Token(input.getLine(), input.getLinePos() - buffer.length(), TokenType::literal, buffer));
     buffer = "";
 }

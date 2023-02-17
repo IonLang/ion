@@ -2,23 +2,21 @@
 #include <iostream>
 
 using namespace Lexing;
+using namespace FileAccess;
 
-NumberLexer::NumberLexer(uint32_t& line, uint32_t& linePos, std::list<Token>& tokens) : Lexer(line, linePos, tokens) {}
+NumberLexer::NumberLexer(std::list<Token>& tokens) : Lexer(tokens) {}
 
-void NumberLexer::tokenize(std::istream& input) {
+void NumberLexer::tokenize(FileReader& input) {
     std::string buffer = "";
     bool comma = false;
     char mode = 'd';
-    char c;
-    input.get(c);
-    linePos++;
+    char c = input.getch();
     if (c == '0') {
         if (!input.good()) {
-            tokens.push_back(Token(line, linePos - 1, TokenType::literal, "0"));
+            tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::literal, "0"));
             return;
         }
-        char m;
-        input.get(m);
+        char m = input.getch();
         switch (m) {
             case 'b':
             case 'x':
@@ -26,28 +24,25 @@ void NumberLexer::tokenize(std::istream& input) {
                 buffer += m;
                 break;
             case '\n':
-                tokens.push_back(Token(line, linePos - 2, TokenType::literal, "0"));
-                tokens.push_back(Token(line, linePos - 1, TokenType::eol));
-                linePos = 0;
-                line++;
+                tokens.push_back(Token(input.getLine(), input.getLinePos() - 2, TokenType::literal, "0"));
+                tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::eol));
                 return;
             case '.':
                 comma = true;
-                input.get(c);
+                c = input.getch();
                 if (!isdigit(c)) {
-                    input.putback(c);
-                    tokens.push_back(Token(line, linePos - 1, TokenType::dot));
+                    input.putch(c);
+                    tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::dot));
                     return;
                 }
                 buffer += m;
                 buffer += c;
-                linePos++;
                 break;
             case '_':
                 break;
             default:
                 if (!isdigit(m)) {
-                    tokens.push_back(Token(line, linePos - 2, TokenType::literal, "0"));
+                    tokens.push_back(Token(input.getLine(), input.getLinePos() - 2, TokenType::literal, "0"));
                     return;
                 }
                 buffer += m;
@@ -57,8 +52,7 @@ void NumberLexer::tokenize(std::istream& input) {
         buffer += c;
     }
     while (input.good()) {
-        input.get(c);
-        linePos++;
+        c = input.getch();
         if (c == '_') {
             continue;
         }
@@ -68,27 +62,24 @@ void NumberLexer::tokenize(std::istream& input) {
                     buffer += c;
                     continue;
                 }
-                input.putback(c);
-                linePos--;
+                input.putch(c);
                 break;
             case 'x':
                 if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                     buffer += c;
                     continue;
                 }
-                input.putback(c);
-                linePos--;
+                input.putch(c);
                 break;
             case 'b':
                 if (c == '0' || c == '1') {
                     buffer += c;
                     continue;
                 }
-                input.putback(c);
-                linePos--;
+                input.putch(c);
                 break;
         }
-        tokens.push_back(Token(line, linePos - buffer.length(), TokenType::literal, buffer));
+        tokens.push_back(Token(input.getLine(), input.getLinePos() - buffer.length(), TokenType::literal, buffer));
         return;
     }
 }

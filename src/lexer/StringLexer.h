@@ -6,12 +6,12 @@ namespace Lexing {
 
 class StringLexer : public Lexer {
 public:
-    StringLexer(uint32_t& line, uint32_t& linePos, std::list<Token>& tokens);
+    StringLexer(std::list<Token>& tokens);
     ~StringLexer() override {};
 
-    void tokenize(std::istream& input) override;
+    void tokenize(FileAccess::FileReader& input) override;
 private:
-    void processToken();
+    void processToken(FileAccess::FileReader& input);
     std::string buffer = "";
 };
 

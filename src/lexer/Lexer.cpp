@@ -6,4 +6,4 @@
 
 using namespace Lexing;
 
-Lexer::Lexer(uint32_t& line, uint32_t& linePos, std::list<Token>& tokens) : line(line), linePos(linePos), tokens(tokens) {}
+Lexer::Lexer(std::list<Token>& tokens) : tokens(tokens) {}

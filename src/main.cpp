@@ -1,19 +1,18 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include "fileaccess/FileReader.h"
 #include "lexer/CodeLexer.h"
 
 using namespace Lexing;
+using namespace FileAccess;
 
 int main() {
-    std::ifstream testFile("test.ion");
-    uint32_t line = 0;
-    uint32_t linePos = 0;
+    FileReader testFile("test.ion");
     std::list<Token> tokens;
-    CodeLexer lexer = CodeLexer(line, linePos, tokens);
+    CodeLexer lexer = CodeLexer(tokens);
     lexer.tokenize(testFile);
-    tokens.push_back(Token(line, linePos, TokenType::eof));
-    testFile.close();
+    tokens.push_back(Token(testFile.getLine(), testFile.getLinePos(), TokenType::eof));
     std::ofstream output("tokens.txt");
     for (auto& i : tokens) {
         output.write(TokenTypeNames[i.type()].data(), TokenTypeNames[i.type()].length());
