@@ -2,6 +2,9 @@
 
 namespace AST {
 
-class BaseAST {};
+class BaseAST {
+public:
+    virtual ~BaseAST() {};
+};
 
 }
