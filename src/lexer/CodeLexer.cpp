@@ -7,7 +7,7 @@
 using namespace Lexing;
 using namespace FileAccess;
 
-CodeLexer::CodeLexer(std::list<Token>& tokens) : Lexer(tokens) {}
+CodeLexer::CodeLexer(std::list<Token>& tokens, bool root) : Lexer(tokens), root(root) {}
 
 void CodeLexer::tokenize(FileReader& input) {
     char c;
@@ -24,7 +24,11 @@ void CodeLexer::tokenize(FileReader& input) {
             case '}':
                 processToken(input);
                 tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::braceRight));
-                return;
+                if (root) {
+                    break;
+                } else {
+                    return;
+                }
             case '[':
                 processToken(input);
                 tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::bracketLeft));

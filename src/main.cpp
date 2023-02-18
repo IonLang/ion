@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <fstream>
 #include <iostream>
 #include "fileaccess/FileReader.h"
 #include "lexer/CodeLexer.h"
@@ -10,7 +9,7 @@ using namespace FileAccess;
 int main() {
     FileReader testFile("test.ion");
     std::list<Token> tokens;
-    CodeLexer lexer = CodeLexer(tokens);
+    CodeLexer lexer = CodeLexer(tokens, true);
     lexer.tokenize(testFile);
     tokens.push_back(Token(testFile.getLine(), testFile.getLinePos(), TokenType::eof));
     std::ofstream output("tokens.txt");
