@@ -1,12 +1,14 @@
 import ion.something
 
+annotation TestAnnotation(val value: String = "test")
+
 class TestClass(var name: String, val num: I32) {
 
     var a by lazy { 1 + 3 * 2 }
 
     var `more open identifier` = null
 
-    constructor {}
+    constructor {}}
 
     constructor() : this() {}
 
@@ -14,11 +16,18 @@ class TestClass(var name: String, val num: I32) {
 
     fun abstractFunction()
 
+    @TestAnnotation
     fun test() {
         val ((a, b), c) = ((1, 2), 3)
     }
 
     fun test1(): String {
+        0x5FABCC
+        0xFFABCC
+        0b0101001
+        0.1323
+        12313
+        .12312
         return "line1
                 ${Ansi.foreground(RGB(2, 5, 5))}
                 \${line4}

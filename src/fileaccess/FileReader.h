@@ -19,6 +19,8 @@ public:
     uint32_t getLinePos();
 
 private:
+    static constexpr int bufferSize = 4096;
+    char buffer[bufferSize];
     std::ifstream stream;
     std::stack<char> stack;
     uint32_t line = 0;

@@ -125,6 +125,8 @@ enum TokenType {
     escUnicode,
     escDollarSign,
     dollarSign,
+    hexLiteralMarker,
+    binLiteralMarker
 };
 
 static std::string TokenTypeNames[] = {
@@ -247,6 +249,8 @@ static std::string TokenTypeNames[] = {
     "escUnicode",
     "escDollarSign",
     "dollarSign",
+    "hexLiteralMarker",
+    "binLiteralMarker",
 };
 
 }

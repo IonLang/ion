@@ -96,6 +96,11 @@ void CodeLexer::tokenize(FileReader& input) {
                         input.putch(t);
                         tokens.push_back(Token(input.getLine(), input.getLinePos() - 2, TokenType::range));
                     }
+                } else if (isdigit(s)) {
+                    input.putch(s);
+                    tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::dot));
+                    auto numberLexer = NumberLexer(tokens);
+                    numberLexer.tokenize(input);
                 } else {
                     input.putch(s);
                     tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::dot));

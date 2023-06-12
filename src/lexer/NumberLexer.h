@@ -10,6 +10,9 @@ public:
     ~NumberLexer() override {};
 
     void tokenize(FileAccess::FileReader& input) override;
+private:
+    std::string buffer = "";
+    void processToken(FileAccess::FileReader& input);
 };
 
 }

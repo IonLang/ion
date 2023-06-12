@@ -4,6 +4,7 @@ using namespace FileAccess;
 
 FileReader::FileReader(const std::string& path) {
     stream = std::ifstream(path);
+    stream.rdbuf()->pubsetbuf(buffer, bufferSize);
 }
 
 FileReader::~FileReader() {
