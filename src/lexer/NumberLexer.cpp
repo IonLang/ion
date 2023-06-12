@@ -12,7 +12,6 @@ void NumberLexer::tokenize(FileReader& input) {
         if (c == '_') {
             continue;
         } else if ((c == 'x' || c == 'b') && buffer.back() == '0' && buffer.size() == 1) {
-            buffer += c;
             tokens.push_back(Token(input.getLine(), input.getLinePos() - 2, c == 'x' ? TokenType::hexLiteralMarker : TokenType::binLiteralMarker));
             buffer = "";
             continue;
