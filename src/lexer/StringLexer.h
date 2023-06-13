@@ -11,6 +11,7 @@ public:
 
     void tokenize(FileAccess::FileReader& input) override;
 private:
+    bool seekBlankSpace(FileAccess::FileReader& input, const uint32_t& startLinePos);
     void processToken(FileAccess::FileReader& input);
     std::string buffer = "";
 };

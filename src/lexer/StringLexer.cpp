@@ -39,22 +39,30 @@ void StringLexer::tokenize(FileReader& input) {
                 break;
             }
             case '\n':
-                while (input.getLinePos() < startLinePos) {
-                    char e = input.getch();
-                    if (e == '\n') {
-                        input.putch('\n');
-                        break;
-                    } else if (e != ' ') {
-                        throw std::exception();
-                    }
+                if (!seekBlankSpace(input, startLinePos)) {
+                    buffer += "\n";
                 }
-                buffer += "\n";
                 break;
             default:
                 buffer += c;
                 break;
         }
     }
+}
+
+bool StringLexer::seekBlankSpace(FileReader& input, const uint32_t& startLinePos) {
+    while (input.getLinePos() < startLinePos) {
+        char e = input.getch();
+        if (e == '\n') {
+            input.putch('\n');
+            break;
+        } else if (e != ' ') {
+            processToken(input);
+            tokens.push_back(Token(input.getLine(), input.getLinePos(), TokenType::error, std::string(&e, 1)));
+            return false;
+        }
+    }
+    return true;
 }
 
 void StringLexer::processToken(FileAccess::FileReader& input) {

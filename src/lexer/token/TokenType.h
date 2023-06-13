@@ -108,6 +108,8 @@ enum TokenType {
     infix,
     increment,
     decrement,
+    hexLiteralMarker,
+    binLiteralMarker,
 
     // string stuff
 
@@ -125,8 +127,7 @@ enum TokenType {
     escUnicode,
     escDollarSign,
     dollarSign,
-    hexLiteralMarker,
-    binLiteralMarker
+    error,
 };
 
 static std::string TokenTypeNames[] = {
@@ -235,6 +236,8 @@ static std::string TokenTypeNames[] = {
     "infix",
     "increment",
     "decrement",
+    "hexLiteralMarker",
+    "binLiteralMarker",
     "escSingleQuote",
     "escDoubleQuote",
     "escBackSlash",
@@ -249,8 +252,7 @@ static std::string TokenTypeNames[] = {
     "escUnicode",
     "escDollarSign",
     "dollarSign",
-    "hexLiteralMarker",
-    "binLiteralMarker",
+    "error",
 };
 
 }

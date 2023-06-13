@@ -10,16 +10,11 @@ void IdentifierLexer::tokenize(FileReader& input) {
     char c;
     while (input.good()) {
         c = input.getch();
-        switch (c) {
-            case '\n':
-                throw std::exception();
-            case '`':
-                tokens.push_back(Token(input.getLine(), input.getLinePos() - buffer.length(), TokenType::identifier, buffer));
-                tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::grave));
-                return;
-            default:
-                buffer += c;
-                break;
+        if (c == '`') {
+            tokens.push_back(Token(input.getLine(), input.getLinePos() - buffer.length(), TokenType::identifier, buffer));
+            tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::grave));
+            return;
         }
+        buffer += c;
     }
 }

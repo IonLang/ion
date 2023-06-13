@@ -8,7 +8,7 @@ class TestClass(var name: String, val num: I32) {
 
     var `more open identifier` = null
 
-    constructor {}}
+    constructor {}
 
     constructor() : this() {}
 
@@ -29,7 +29,7 @@ class TestClass(var name: String, val num: I32) {
         12313
         .12312
         return "line1
-                ${Ansi.foreground(RGB(2, 5, 5))}
+           a     ${Ansi.foreground(RGB(2, 5, 5))}
                 \${line4}
                 line5"
     }
