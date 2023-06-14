@@ -43,27 +43,19 @@ void CharLexer::tokenize(FileReader& input) {
             case '0': {
                 char l = input.getch();
                 char r = input.getch();
-                if (l >= '0' && l <= '8' && r >= '0' && r <= '8') {
-                    std::string num = "";
-                    num += l;
-                    num += r;
-                    tokens.push_back(Token(input.getLine(), input.getLinePos() - 4, TokenType::escOctal, num));
-                } else {
-                    throw std::exception();
-                }
+                std::string num = "";
+                num += l;
+                num += r;
+                tokens.push_back(Token(input.getLine(), input.getLinePos() - 4, l >= '0' && l <= '8' && r >= '0' && r <= '8' ? TokenType::escOctal : TokenType::error, num));
                 break;
             }
             case 'x': {
                 char l = input.getch();
                 char r = input.getch();
-                if ((isdigit(l) || (l >= '0' && l <= '6')) && (isdigit(r) || (r >= '0' && r <= '6'))) {
-                    std::string num = "";
-                    num += l;
-                    num += r;
-                    tokens.push_back(Token(input.getLine(), input.getLinePos() - 4, TokenType::escHex, num));
-                } else {
-                    throw std::exception();
-                }
+                std::string num = "";
+                num += l;
+                num += r;
+                tokens.push_back(Token(input.getLine(), input.getLinePos() - 4, isxdigit(l) && isxdigit(r) ? TokenType::escHex : TokenType::error, num));
                 break;
             }
             case 'u': {
@@ -71,23 +63,16 @@ void CharLexer::tokenize(FileReader& input) {
                 char n1 = input.getch();
                 char n2 = input.getch();
                 char n3 = input.getch();
-                if ((isdigit(n0) || (n0 >= '0' && n0 <= '6'))
-                    && (isdigit(n1) || (n1 >= '0' && n1 <= '6'))
-                    && (isdigit(n2) || (n2 >= '0' && n2 <= '6'))
-                    && (isdigit(n3) || (n3 >= '0' && n3 <= '6'))) {
-                    std::string num = "";
-                    num += n0;
-                    num += n1;
-                    num += n2;
-                    num += n3;
-                    tokens.push_back(Token(input.getLine(), input.getLinePos() - 6, TokenType::escUnicode, num));
-                } else {
-                    throw std::exception();
-                }
+                std::string num = "";
+                num += n0;
+                num += n1;
+                num += n2;
+                num += n3;
+                tokens.push_back(Token(input.getLine(), input.getLinePos() - 6, isxdigit(n0) && isxdigit(n1) && isxdigit(n2) && isxdigit(n3) ? TokenType::escUnicode : TokenType::error, num));
                 break;
             }
         }
     } else {
-        tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::literal, std::string({c})));
+        tokens.push_back(Token(input.getLine(), input.getLinePos() - 1, TokenType::literal, std::string(&c, 1)));
     }
 }
